@@ -15,6 +15,10 @@
 		C879B1D01EC2A57C00D7C312 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C879B1CE1EC2A57C00D7C312 /* LaunchScreen.storyboard */; };
 		C879B1DB1EC2A57D00D7C312 /* runtimeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C879B1DA1EC2A57D00D7C312 /* runtimeTests.m */; };
 		C879B1E61EC2A57D00D7C312 /* runtimeUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = C879B1E51EC2A57D00D7C312 /* runtimeUITests.m */; };
+		C879B1F51EC2AF0D00D7C312 /* TestClass.m in Sources */ = {isa = PBXBuildFile; fileRef = C879B1F41EC2AF0D00D7C312 /* TestClass.m */; };
+		C879B1F81EC2B3D800D7C312 /* Person.m in Sources */ = {isa = PBXBuildFile; fileRef = C879B1F71EC2B3D800D7C312 /* Person.m */; };
+		C879B21F1EC2E72500D7C312 /* MyClass.m in Sources */ = {isa = PBXBuildFile; fileRef = C879B21E1EC2E72500D7C312 /* MyClass.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		C879B2281EC3114E00D7C312 /* MyObject.m in Sources */ = {isa = PBXBuildFile; fileRef = C879B2271EC3114E00D7C312 /* MyObject.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +55,14 @@
 		C879B1E11EC2A57D00D7C312 /* runtimeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = runtimeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		C879B1E51EC2A57D00D7C312 /* runtimeUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = runtimeUITests.m; sourceTree = "<group>"; };
 		C879B1E71EC2A57D00D7C312 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C879B1F31EC2AF0D00D7C312 /* TestClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestClass.h; sourceTree = "<group>"; };
+		C879B1F41EC2AF0D00D7C312 /* TestClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestClass.m; sourceTree = "<group>"; };
+		C879B1F61EC2B3D800D7C312 /* Person.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Person.h; sourceTree = "<group>"; };
+		C879B1F71EC2B3D800D7C312 /* Person.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Person.m; sourceTree = "<group>"; };
+		C879B21D1EC2E72500D7C312 /* MyClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyClass.h; sourceTree = "<group>"; };
+		C879B21E1EC2E72500D7C312 /* MyClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyClass.m; sourceTree = "<group>"; };
+		C879B2261EC3114E00D7C312 /* MyObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyObject.h; sourceTree = "<group>"; };
+		C879B2271EC3114E00D7C312 /* MyObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyObject.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +117,14 @@
 				C879B1C41EC2A57C00D7C312 /* AppDelegate.m */,
 				C879B1C61EC2A57C00D7C312 /* ViewController.h */,
 				C879B1C71EC2A57C00D7C312 /* ViewController.m */,
+				C879B2261EC3114E00D7C312 /* MyObject.h */,
+				C879B2271EC3114E00D7C312 /* MyObject.m */,
+				C879B21D1EC2E72500D7C312 /* MyClass.h */,
+				C879B21E1EC2E72500D7C312 /* MyClass.m */,
+				C879B1F61EC2B3D800D7C312 /* Person.h */,
+				C879B1F71EC2B3D800D7C312 /* Person.m */,
+				C879B1F31EC2AF0D00D7C312 /* TestClass.h */,
+				C879B1F41EC2AF0D00D7C312 /* TestClass.m */,
 				C879B1C91EC2A57C00D7C312 /* Main.storyboard */,
 				C879B1CC1EC2A57C00D7C312 /* Assets.xcassets */,
 				C879B1CE1EC2A57C00D7C312 /* LaunchScreen.storyboard */,
@@ -276,7 +296,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C879B21F1EC2E72500D7C312 /* MyClass.m in Sources */,
+				C879B1F51EC2AF0D00D7C312 /* TestClass.m in Sources */,
+				C879B2281EC3114E00D7C312 /* MyObject.m in Sources */,
 				C879B1C81EC2A57C00D7C312 /* ViewController.m in Sources */,
+				C879B1F81EC2B3D800D7C312 /* Person.m in Sources */,
 				C879B1C51EC2A57C00D7C312 /* AppDelegate.m in Sources */,
 				C879B1C21EC2A57C00D7C312 /* main.m in Sources */,
 			);
