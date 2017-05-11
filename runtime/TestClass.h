@@ -10,4 +10,6 @@
 
 @interface TestClass : NSObject
 - (void)ex_registerClassPair;
+- (void)testLibrary;
+
 @end

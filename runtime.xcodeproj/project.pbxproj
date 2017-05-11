@@ -19,6 +19,11 @@
 		C879B1F81EC2B3D800D7C312 /* Person.m in Sources */ = {isa = PBXBuildFile; fileRef = C879B1F71EC2B3D800D7C312 /* Person.m */; };
 		C879B21F1EC2E72500D7C312 /* MyClass.m in Sources */ = {isa = PBXBuildFile; fileRef = C879B21E1EC2E72500D7C312 /* MyClass.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		C879B2281EC3114E00D7C312 /* MyObject.m in Sources */ = {isa = PBXBuildFile; fileRef = C879B2271EC3114E00D7C312 /* MyObject.m */; };
+		C88349B81EC4074B0043F58A /* SUTRuntimeMethodHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = C88349B71EC4074B0043F58A /* SUTRuntimeMethodHelper.m */; };
+		C88349BB1EC40F490043F58A /* TestViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C88349BA1EC40F490043F58A /* TestViewController.m */; };
+		C88349BE1EC420A80043F58A /* RuntimeCategoryClass.m in Sources */ = {isa = PBXBuildFile; fileRef = C88349BD1EC420A80043F58A /* RuntimeCategoryClass.m */; };
+		C88349C81EC422880043F58A /* RuntimeCategoryClass+Category.m in Sources */ = {isa = PBXBuildFile; fileRef = C88349C71EC422880043F58A /* RuntimeCategoryClass+Category.m */; };
+		C88349CB1EC426490043F58A /* MyRuntimeBlock.m in Sources */ = {isa = PBXBuildFile; fileRef = C88349CA1EC426490043F58A /* MyRuntimeBlock.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +68,16 @@
 		C879B21E1EC2E72500D7C312 /* MyClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyClass.m; sourceTree = "<group>"; };
 		C879B2261EC3114E00D7C312 /* MyObject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyObject.h; sourceTree = "<group>"; };
 		C879B2271EC3114E00D7C312 /* MyObject.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyObject.m; sourceTree = "<group>"; };
+		C88349B61EC4074B0043F58A /* SUTRuntimeMethodHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SUTRuntimeMethodHelper.h; sourceTree = "<group>"; };
+		C88349B71EC4074B0043F58A /* SUTRuntimeMethodHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SUTRuntimeMethodHelper.m; sourceTree = "<group>"; };
+		C88349B91EC40F490043F58A /* TestViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestViewController.h; sourceTree = "<group>"; };
+		C88349BA1EC40F490043F58A /* TestViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestViewController.m; sourceTree = "<group>"; };
+		C88349BC1EC420A80043F58A /* RuntimeCategoryClass.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RuntimeCategoryClass.h; sourceTree = "<group>"; };
+		C88349BD1EC420A80043F58A /* RuntimeCategoryClass.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RuntimeCategoryClass.m; sourceTree = "<group>"; };
+		C88349C61EC422880043F58A /* RuntimeCategoryClass+Category.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "RuntimeCategoryClass+Category.h"; sourceTree = "<group>"; };
+		C88349C71EC422880043F58A /* RuntimeCategoryClass+Category.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "RuntimeCategoryClass+Category.m"; sourceTree = "<group>"; };
+		C88349C91EC426490043F58A /* MyRuntimeBlock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyRuntimeBlock.h; sourceTree = "<group>"; };
+		C88349CA1EC426490043F58A /* MyRuntimeBlock.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyRuntimeBlock.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,12 +132,22 @@
 				C879B1C41EC2A57C00D7C312 /* AppDelegate.m */,
 				C879B1C61EC2A57C00D7C312 /* ViewController.h */,
 				C879B1C71EC2A57C00D7C312 /* ViewController.m */,
+				C88349B91EC40F490043F58A /* TestViewController.h */,
+				C88349BA1EC40F490043F58A /* TestViewController.m */,
 				C879B2261EC3114E00D7C312 /* MyObject.h */,
 				C879B2271EC3114E00D7C312 /* MyObject.m */,
 				C879B21D1EC2E72500D7C312 /* MyClass.h */,
 				C879B21E1EC2E72500D7C312 /* MyClass.m */,
 				C879B1F61EC2B3D800D7C312 /* Person.h */,
 				C879B1F71EC2B3D800D7C312 /* Person.m */,
+				C88349C91EC426490043F58A /* MyRuntimeBlock.h */,
+				C88349CA1EC426490043F58A /* MyRuntimeBlock.m */,
+				C88349BC1EC420A80043F58A /* RuntimeCategoryClass.h */,
+				C88349BD1EC420A80043F58A /* RuntimeCategoryClass.m */,
+				C88349C61EC422880043F58A /* RuntimeCategoryClass+Category.h */,
+				C88349C71EC422880043F58A /* RuntimeCategoryClass+Category.m */,
+				C88349B61EC4074B0043F58A /* SUTRuntimeMethodHelper.h */,
+				C88349B71EC4074B0043F58A /* SUTRuntimeMethodHelper.m */,
 				C879B1F31EC2AF0D00D7C312 /* TestClass.h */,
 				C879B1F41EC2AF0D00D7C312 /* TestClass.m */,
 				C879B1C91EC2A57C00D7C312 /* Main.storyboard */,
@@ -296,12 +321,17 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C88349CB1EC426490043F58A /* MyRuntimeBlock.m in Sources */,
 				C879B21F1EC2E72500D7C312 /* MyClass.m in Sources */,
 				C879B1F51EC2AF0D00D7C312 /* TestClass.m in Sources */,
 				C879B2281EC3114E00D7C312 /* MyObject.m in Sources */,
+				C88349BE1EC420A80043F58A /* RuntimeCategoryClass.m in Sources */,
 				C879B1C81EC2A57C00D7C312 /* ViewController.m in Sources */,
+				C88349B81EC4074B0043F58A /* SUTRuntimeMethodHelper.m in Sources */,
 				C879B1F81EC2B3D800D7C312 /* Person.m in Sources */,
+				C88349BB1EC40F490043F58A /* TestViewController.m in Sources */,
 				C879B1C51EC2A57C00D7C312 /* AppDelegate.m in Sources */,
+				C88349C81EC422880043F58A /* RuntimeCategoryClass+Category.m in Sources */,
 				C879B1C21EC2A57C00D7C312 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -542,6 +572,7 @@
 				C879B1EC1EC2A57D00D7C312 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		C879B1ED1EC2A57D00D7C312 /* Build configuration list for PBXNativeTarget "runtimeTests" */ = {
 			isa = XCConfigurationList;
@@ -550,6 +581,7 @@
 				C879B1EF1EC2A57D00D7C312 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		C879B1F01EC2A57D00D7C312 /* Build configuration list for PBXNativeTarget "runtimeUITests" */ = {
 			isa = XCConfigurationList;
@@ -558,6 +590,7 @@
 				C879B1F21EC2A57D00D7C312 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

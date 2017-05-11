@@ -8,6 +8,8 @@
 
 #import "Person.h"
 #import <objc/runtime.h>
+#import "SUTRuntimeMethodHelper.h"
+#import "MyRuntimeBlock.h"
 
 
 @implementation Person
@@ -410,7 +412,8 @@ void test10(){
     
     /**
      我们可以在运行时添加新的selector，也可以在运行时获取已存在的selector，我们可以通过下面三种方法来获取SEL:
-     
+     //方法和消息
+void test10(){
      1.sel_registerName函数
      
      2.Objective-C编译器提供的@selector()
@@ -429,11 +432,601 @@ void test10(){
      
      通过取得IMP，我们可以跳过Runtime的消息传递机制，直接执行IMP指向的函数实现，这样省去了Runtime消息传递过程中所做的一系列查找操作，会比直接向对象发送消息高效一些。
      */
-  
-  
+}
+//Method
+void test11(){
+
+
+    //Method用于表示类定义中的方法，则定义如下：
+    typedef struct objc_method *Method;
+    struct objc_method {
+        SEL method_name                     OBJC2_UNAVAILABLE;  // 方法名
+        char *method_types                  OBJC2_UNAVAILABLE;
+        IMP method_imp                      OBJC2_UNAVAILABLE;  // 方法实现
+    };
+    
+    
+    //我们可以看到该结构体中包含一个SEL和IMP，实际上相当于在SEL和IMP之间作了一个映射。有了SEL，我们便可以找到对应的IMP，从而调用方法的实现代码。
+    //具体操作流程我们将在下面讨论。
+    
+    /// Defines a method
+    struct objc_method_description {
+        SEL name;               /**< 方法的名称 */
+        char *types;            /**< 方法参数的类型 */
+    };
+   // objc_method_description定义了一个Objective-C方法，其定义如下：
+    /**
+     struct objc_method_description {
+             SEL name;        方法的名称
+            char *types;      方法参数的类型
+        };*/
+
+}
+//方法相关操作函数
+void test12(){
+
+    //Runtime提供了一系列的方法来处理与方法相关的操作。包括方法本身及SEL。本节我们介绍一下这些函数。
+    
+    //方法操作相关函数包括下以：
+    // 调用指定方法的实现
+    //id method_invoke ( id receiver, Method m, ... );
+    //method_invoke函数，返回的是实际实现的返回值。参数receiver不能为空。这个方法的效率会比method_getImplementation和method_getName更快。
+    OBJC_EXPORT void method_invoke(void /* id receiver, Method m, ... */ );
+   
+    //调用返回一个数据结构的方法的实现
+    //void method_invoke_stret ( id receiver, Method m, ... );
+    OBJC_EXPORT void method_invoke_stret(void /* id receiver, Method m, ... */ );
+    
+    // 获取方法名
+    //method_getName函数，返回的是一个SEL。如果想获取方法名的C字符串，可以使用sel_getName(method_getName(method))。
+    SEL method_getName ( Method m );
+    
+    // 返回方法的实现
+    IMP method_getImplementation ( Method m );
+    
+    // 获取描述方法参数和返回值类型的字符串
+    const char * method_getTypeEncoding ( Method m );
+    
+    // 获取方法的返回值类型的字符串
+    char * method_copyReturnType ( Method m );
+    
+    // 获取方法的指定位置参数的类型字符串
+    char * method_copyArgumentType ( Method m, unsigned int index );
+    
+    // 通过引用返回方法的返回值类型字符串
+    //method_getReturnType函数，类型字符串会被拷贝到dst中。
+    void method_getReturnType ( Method m, char *dst, size_t dst_len );
+    
+    // 返回方法的参数的个数
+    unsigned int method_getNumberOfArguments ( Method m );
+    
+    // 通过引用返回方法指定位置参数的类型字符串
+    void method_getArgumentType ( Method m, unsigned int index, char *dst, size_t dst_len );
+    
+    // 返回指定方法的方法描述结构体
+    struct objc_method_description * method_getDescription ( Method m );
+    
+    // 设置方法的实现
+    //method_setImplementation函数，注意该函数返回值是方法之前的实现。
+    IMP method_setImplementation ( Method m, IMP imp );
+    
+    // 交换两个方法的实现
+    void method_exchangeImplementations ( Method m1, Method m2 );
+}
+//方法选择器
+void test13(){
+   
+    //选择器相关的操作函数包括：
+    // 返回给定选择器指定的方法的名称
+    const char * sel_getName ( SEL sel );
+    
+    // 在Objective-C Runtime系统中注册一个方法，将方法名映射到一个选择器，并返回这个选择器
+    //sel_registerName函数：在我们将一个方法添加到类定义时，我们必须在Objective-C Runtime系统中注册一个方法名以获取方法的选择器。
+    SEL sel_registerName ( const char *str );
+    
+    // 在Objective-C Runtime系统中注册一个方法
+    SEL sel_getUid ( const char *str );
+    
+    // 比较两个选择器
+    BOOL sel_isEqual ( SEL lhs, SEL rhs );
+    
+    
+}
+//方法调用流程
+void test14(){
+    
+    //在Objective-C中，消息直到运行时才绑定到方法实现上。编译器会将消息表达式[receiver message]转化为一个消息函数的调用，即objc_msgSend。这个函数将消息接收者和方法名作为其基础参数，如以下所示：
+    //objc_msgSend(receiver, selector)
+    
+    
+    // 如果消息中还有其它参数，则该方法的形式如下所示：
+    // objc_msgSend(receiver, selector, arg1, arg2, ...)
+    
+    /**
+     这个函数完成了动态绑定的所有事情：
+     
+     首先它找到selector对应的方法实现。因为同一个方法可能在不同的类中有不同的实现，所以我们需要依赖于接收者的类来找到的确切的实现。
+     
+     它调用方法实现，并将接收者对象及方法的所有参数传给它。
+     
+     最后，它将实现返回的值作为它自己的返回值。
+     
+     消息的关键在于我们前面章节讨论过的结构体objc_class，这个结构体有两个字段是我们在分发消息的关注的：
+     
+     指向父类的指针
+     
+     一个类的方法分发表，即methodLists。
+     
+     当我们创建一个新对象时，先为其分配内存，并初始化其成员变量。其中isa指针也会被初始化，让对象可以访问类及类的继承体系。
+     
+     当消息发送给一个对象时，objc_msgSend通过对象的isa指针获取到类的结构体，然后在方法分发表里面查找方法的selector。如果 没有找到selector，则通过objc_msgSend结构体中的指向父类的指针找到其父类，并在父类的分发表里面查找方法的selector。依 此，会一直沿着类的继承体系到达NSObject类。一旦定位到selector，函数会就获取到了实现的入口点，并传入相应的参数来执行方法的具体实 现。如果最后没有定位到selector，则会走消息转发流程，这个我们在后面讨论。
+     
+     为了加速消息的处理，运行时系统缓存使用过的selector及对应的方法的地址。这点我们在前面讨论过，不再重复。
+     */
+}
+//隐藏参数
+void test15(){
+
+    /**
+     objc_msgSend有两个隐藏参数：
+     
+     1.消息接收对象
+     
+     2.方法的selector
+     
+     这两个参数为方法的实现提供了调用者的信息。之所以说是隐藏的，是因为它们在定义方法的源代码中没有声明。它们是在编译期被插入实现代码的。
+     
+     虽然这些参数没有显示声明，但在代码中仍然可以引用它们。我们可以使用self来引用接收者对象，使用_cmd来引用选择器。如下代码所示：
+     
+     - strange
+    {
+         id  target = getTheReceiver();
+         SEL method = getTheMethod();
+         
+         if ( target == self || method == _cmd )
+         return nil;
+         return [target performSelector:method];
+     }
+     当然，这两个参数我们用得比较多的是self，_cmd在实际中用得比较少。
+     */
+}
+//获取方法地址
+void test16(){
+    
+    /**
+     Runtime中方法的动态绑定让我们写代码时更具灵活性，如我们可以把消息转发给我们想要的对象，或者随意交换一个方法的实现等。不过灵活性的提 升也带来了性能上的一些损耗。毕竟我们需要去查找方法的实现，而不像函数调用来得那么直接。当然，方法的缓存一定程度上解决了这一问题。
+     
+     我们上面提到过，如果想要避开这种动态绑定方式，我们可以获取方法实现的地址，然后像调用函数一样来直接调用它。特别是当我们需要在一个循环内频繁地调用一个特定的方法时，通过这种方式可以提高程序的性能。
+     
+     NSObject类提供了methodForSelector:方法，让我们可以获取到方法的指针，然后通过这个指针来调用实现代码。我们需要将methodForSelector:返回的指针转换为合适的函数类型，函数参数和返回值都需要匹配上。
+     
+     我们通过以下代码来看看methodForSelector:的使用：
+     
+     
+     void (*setter)(id, SEL, BOOL);
+     int i;
+     
+     setter = (void (*)(id, SEL, BOOL))[target
+     methodForSelector:@selector(setFilled:)];
+     for ( i = 0 ; i < 1000 ; i++ )
+     setter(targetList[i], @selector(setFilled:), YES);
+     
+     
+     这里需要注意的就是函数指针的前两个参数必须是id和SEL。
+     
+     当然这种方式只适合于在类似于for循环这种情况下频繁调用同一方法，以提高性能的情况。另外，methodForSelector:是由Cocoa运行时提供的；它不是Objective-C语言的特性。
+     
+     */
+    
+}
+//消息转发
+void test17(){
+
+    /**
+     当一个对象能接收一个消息时，就会走正常的方法调用流程。但如果一个对象无法接收指定消息时，又会发生什么事呢？默认情况下，如果是以 [object message]的方式调用方法，如果object无法响应message消息时，编译器会报错。但如果是以perform…的形式来调用，则需要等到运 行时才能确定object是否能接收message消息。如果不能，则程序崩溃。
+     
+     通常，当我们不能确定一个对象是否能接收某个消息时，会先调用respondsToSelector:来判断一下。如下代码所示：
+     
+     if ([self respondsToSelector:@selector(method)]) {
+     [self performSelector:@selector(method)];
+     }
+     */
+   
+    
+    //当一个对象无法接收某一消息时，就会启动所谓”消息转发(message forwarding)“机制，通过这一机制，我们可以告诉对象如何处理未知的消息。默认情况下，对象接收到未知的消息，会导致程序崩溃，通过控制台，我们可以看到以下异常信息：
+    
+    /**
+     -[SUTRuntimeMethod method]: unrecognized selector sent to instance 0x100111940
+     
+     *** Terminating app due to uncaught exception 'NSInvalidArgumentException', reason: '-[SUTRuntimeMethod method]: unrecognized selector sent to instance 0x100111940'
+     
+     这段异常信息实际上是由NSObject的”doesNotRecognizeSelector”方法抛出的。不过，我们可以采取一些措施，让我们的程序执行特定的逻辑，而避免程序的崩溃。
+     
+     消息转发机制基本上分为三个步骤：
+     
+     1.动态方法解析
+     
+     2.备用接收者
+     
+     3.完整转发
+     
+     */
+}
+//动态方法解析
+void test18(){
+
+    //对象在接收到未知的消息时，首先会调用所属类的类方法+resolveInstanceMethod:(实例方法)或 者+resolveClassMethod:(类方法)。在这个方法中，我们有机会为该未知消息新增一个”处理方法”“。不过使用该方法的前提是我们已经 实现了该”处理方法”，只需要在运行时通过class_addMethod函数动态添加到类里面就可以了。如下代码所示：
+
+}
+void functionForMethod1(id self, SEL _cmd) {
+    NSLog(@"%@, %p", self, _cmd);
 }
 
++ (BOOL)resolveInstanceMethod:(SEL)sel {
+    
+    NSString *selectorString = NSStringFromSelector(sel);
+    
+    if ([selectorString isEqualToString:@"method1"]) {
+        class_addMethod(self.class, @selector(method1), (IMP)functionForMethod1, "@:");
+    }
+    
+    return [super resolveInstanceMethod:sel];
+    //不过这种方案更多的是为了实现@dynamic属性。
+}
+//备用接收者
+void test19(){
 
+    //如果在 test18 无法处理消息，则Runtime会继续调以下方法：
+    NSObject *object = [[NSObject alloc]init];
+    [object forwardingTargetForSelector:nil];
+    
+    //如果一个对象实现了这个方法，并返回一个非nil的结果，则这个对象会作为消息的新接收者，且消息会被分发到这个对象。当然这个对象不能是self自身，否则就是出现无限循环。当然，如果我们没有指定相应的对象来处理aSelector，则应该调用父类的实现来返回结果。
+    
+    //使用这个方法通常是在对象内部，可能还有一系列其它对象能处理该消息，我们便可借这些对象来处理消息并返回，这样在对象外部看来，还是由该对象亲自处理了这一消息。在 SUTRuntimeMethodHelper.m 里面有代码
+
+}
+//完整消息转发
+void test20(){
+
+    ///如果在上一步还不能处理未知消息，则唯一能做的就是启用完整的消息转发机制了。此时会调用以下方法：
+    NSObject *object = [[NSObject alloc]init];
+    [object forwardInvocation:nil];
+    
+    //运行时系统会在这一步给消息接收者最后一次机会将消息转发给其它对象。对象会创建一个表示消息的NSInvocation对象，把与尚未处理的消息 有关的全部细节都封装在anInvocation中，包括selector，目标(target)和参数。我们可以在forwardInvocation 方法中选择将消息转发给其它对象。
+    
+    
+    /**forwardInvocation:方法的实现有两个任务：
+    
+    定位可以响应封装在anInvocation中的消息的对象。这个对象不需要能处理所有未知消息。
+    
+    使用anInvocation作为参数，将消息发送到选中的对象。anInvocation将会保留调用结果，运行时系统会提取这一结果并将其发送到消息的原始发送者。
+    
+    不过，在这个方法中我们可以实现一些更复杂的功能，我们可以对消息的内容进行修改，比如追回一个参数等，然后再去触发消息。另外，若发现某个消息不应由本类处理，则应调用父类的同名方法，以便继承体系中的每个类都有机会处理此调用请求。*/
+    
+    //还有一个很重要的问题，我们必须重写以下方法：
+    
+    //-(NSMethodSignature *)methodSignatureForSelector:(SEL)aSelector
+    //消息转发机制使用从这个方法中获取的信息来创建NSInvocation对象。因此我们必须重写这个方法，为给定的selector提供一个合适的方法签名。
+    
+    //完整的示例如下所示：在 SUTRuntimeMethodHelper.m 里面
+}
+//消息转发与多重继承
+void test21(){
+
+    //回过头来看第二和第三步，通过这两个方法我们可以允许一个对象与其它对象建立关系，以处理某些未知消息，而表面上看仍然是该对象在处理消息。通过这 种关系，我们可以模拟“多重继承”的某些特性，让对象可以“继承”其它对象的特性来处理一些事情。不过，这两者间有一个重要的区别：多重继承将不同的功能 集成到一个对象中，它会让对象变得过大，涉及的东西过多；而消息转发将功能分解到独立的小的对象中，并通过某种方式将这些对象连接起来，并做相应的消息转发。
+    
+    //不过消息转发虽然类似于继承，但NSObject的一些方法还是能区分两者。如respondsToSelector:和isKindOfClass:只能用于继承体系，而不能用于转发链。便如果我们想让这种消息转发看起来像是继承，则可以重写这些方法，如以下代码所示：
+}
+- (BOOL)respondsToSelector:(SEL)aSelector{
+    if ( [super respondsToSelector:aSelector] )
+        return YES;
+    else {
+        /* Here, test whether the aSelector message can
+         *
+         * be forwarded to another object and whether that
+         *
+         * object can respond to it. Return YES if it can.
+         */
+    }
+    return NO;
+    //小结在此，我们已经了解了Runtime中消息发送和转发的基本机制。这也是Runtime的强大之处，通过它，我们可以为程序增加很多动态的行为，虽 然我们在实际开发中很少直接使用这些机制(如直接调用objc_msgSend)，但了解它们有助于我们更多地去了解底层的实现。其实在实际的编码过程中，我们也可以灵活地使用这些机制，去实现一些特殊的功能，如hook操作等。
+}
+//Method Swizzling
+void test22(){
+
+    /**
+     
+     理解Method Swizzling是学习runtime机制的一个很好的机会。在此不多做整理，仅翻译由Mattt Thompson发表于nshipster的Method Swizzling一文。
+     
+     Method Swizzling是改变一个selector的实际实现的技术。通过这一技术，我们可以在运行时通过修改类的分发表中selector对应的函数，来修改方法的实现。
+     
+     例如，我们想跟踪在程序中每一个view controller展示给用户的次数：当然，我们可以在每个view controller的viewDidAppear中添加跟踪代码；但是这太过麻烦，需要在每个view controller中写重复的代码。创建一个子类可能是一种实现方式，但需要同时创建UIViewController, UITableViewController, UINavigationController及其它UIKit中view controller的子类，这同样会产生许多重复的代码。
+     这种情况下，我们就可以使用Method Swizzling，如在代码所示:在 TestViewController.m 里面
+     
+     在这里，我们通过method swizzling修改了UIViewController的@selector(viewWillAppear:)对应的函数指针，使其实现指向了我们自定义的xxx_viewWillAppear的实现。这样，当UIViewController及其子类的对象调用viewWillAppear时，都会打印一条日志信息。
+     
+     在 TestViewController.m 的例子很好地展示了使用method swizzling来一个类中注入一些我们新的操作。当然，还有许多场景可以使用method swizzling，在此不多举例。在此我们说说使用method swizzling需要注意的一些问题：
+
+     */
+    /**
+     Swizzling应该总是在+load中执行
+     
+     在Objective-C中，运行时会自动调用每个类的两个方法。+load会在类初始加载时调用，+initialize会在第一次调用类的类方法或实例方法之前被调用。这两个方法是可选的，且只有在实现了它们时才会被调用。由于method swizzling会影响到类的全局状态，因此要尽量避免在并发处理中出现竞争的情况。+load能保证在类的初始化过程中被加载，并保证这种改变应用级别的行为的一致性。相比之下，+initialize在其执行时不提供这种保证—事实上，如果在应用中没为给这个类发送消息，则它可能永远不会被调用。
+     
+     Swizzling应该总是在dispatch_once中执行
+     
+     与上面相同，因为swizzling会改变全局状态，所以我们需要在运行时采取一些预防措施。原子性就是这样一种措施，它确保代码只被执行一次，不管有多少个线程。GCD的dispatch_once可以确保这种行为，我们应该将其作为method swizzling的最佳实践。
+     
+     选择器、方法与实现
+     
+     在Objective-C中，选择器(selector)、方法(method)和实现(implementation)是运行时中一个特殊点，虽然在一般情况下，这些术语更多的是用在消息发送的过程描述中。
+     
+     以下是Objective-C Runtime Reference中的对这几个术语一些描述：
+     
+     Selector(typedef struct objc_selector *SEL)：用于在运行时中表示一个方法的名称。一个方法选择器是一个C字符串，它是在Objective-C运行时被注册的。选择器由编译器生成，并且在类被加载时由运行时自动做映射操作。
+     
+     Method(typedef struct objc_method *Method)：在类定义中表示方法的类型
+     
+     Implementation(typedef id (*IMP)(id, SEL, …))：这是一个指针类型，指向方法实现函数的开始位置。这个函数使用为当前CPU架构实现的标准C调用规范。每一个参数是指向对象自身的指针(self)，第二个参数是方法选择器。然后是方法的实际参数。
+     
+     理解这几个术语之间的关系最好的方式是：一个类维护一个运行时可接收的消息分发表；分发表中的每个入口是一个方法(Method)，其中key是一个特定名称，即选择器(SEL)，其对应一个实现(IMP)，即指向底层C函数的指针。
+     
+     为了swizzle一个方法，我们可以在分发表中将一个方法的现有的选择器映射到不同的实现，而将该选择器对应的原始实现关联到一个新的选择器中。
+     
+     */
+    
+}
+//调用_cmd
+void test23(){
+    
+    
+    //我们回过头来看看前面新的方法的实现代码：
+    /**
+    - (void)xxx_viewWillAppear:(BOOL)animated {
+        [self xxx_viewWillAppear:animated];
+        NSLog(@"viewWillAppear: %@", NSStringFromClass([self class]));
+    }
+     */
+    //咋看上去是会导致无限循环的。但令人惊奇的是，并没有出现这种情况。在swizzling的过程中，方法中的[self xxx_viewWillAppear:animated]已经被重新指定到UIViewController类的-viewWillAppear:中。在这种情况下，不会产生无限循环。不过如果我们调用的是[self viewWillAppear:animated]，则会产生无限循环，因为这个方法的实现在运行时已经被重新指定为xxx_viewWillAppear:了。
+}
+//Swizzling 注意事项
+void test24(){
+
+    /**
+     Swizzling通常被称作是一种黑魔法，容易产生不可预知的行为和无法预见的后果。虽然它不是最安全的，但如果遵从以下几点预防措施的话，还是比较安全的：
+     
+     总是调用方法的原始实现(除非有更好的理由不这么做)：API提供了一个输入与输出约定，但其内部实现是一个黑盒。Swizzle一个方法而不调用原始实现可能会打破私有状态底层操作，从而影响到程序的其它部分。
+     
+     避免冲突：给自定义的分类方法加前缀，从而使其与所依赖的代码库不会存在命名冲突。
+     
+     明白是怎么回事：简单地拷贝粘贴swizzle代码而不理解它是如何工作的，不仅危险，而且会浪费学习Objective-C运行时的机会。阅读Objective-C Runtime Reference和查看<objc/runtime.h>头文件以了解事件是如何发生的。
+     
+     */
+#pragma mark -   小心操作：无论我们对Foundation, UIKit或其它内建框架执行Swizzle操作抱有多大信心，需要知道在下一版本中许多事可能会不一样。
+
+
+}
+//协议与分类
+void test25(){
+
+    /**
+     Objective-C中的分类允许我们通过给一个类添加方法来扩充它（但是通过category不能添加新的实例变量），并且我们不需要访问类中的代码就可以做到。
+     
+     Objective-C中的协议是普遍存在的接口定义方式，即在一个类中通过@protocol定义接口，在另外类中实现接口，这种接口定义方式也成为“delegation”模式，@protocol声明了可以被其他任何方法类实现的方法，协议仅仅是定义一个接口，而由其他的类去负责实现。
+     
+     在本章中，我们来看看runtime对分类与协议的支持。
+     
+     */
+}
+//基础数据类型
+void test26(){
+
+    //Category
+    //Category是表示一个指向分类的结构体的指针，其定义如下：
+    
+    typedef struct objc_category *Category;
+    struct objc_category {
+        char *category_name                          OBJC2_UNAVAILABLE; // 分类名
+        char *class_name                             OBJC2_UNAVAILABLE; // 分类所属的类名
+        struct objc_method_list *instance_methods    OBJC2_UNAVAILABLE; // 实例方法列表
+        struct objc_method_list *class_methods       OBJC2_UNAVAILABLE; // 类方法列表
+        struct objc_protocol_list *protocols         OBJC2_UNAVAILABLE; // 分类所实现的协议列表
+    };
+    //这个结构体主要包含了分类定义的实例方法与类方法，其中instance_methods列表是objc_class中方法列表的一个子集，而class_methods列表是元类方法列表的一个子集。
+    
+    
+    //Protocol
+    //Protocol的定义如下：
+    
+    typedef struct objc_object Protocol;
+
+   //可以看到，Protocol其中实就是一个对象结构体。
+
+}
+//操作函数
+void test27(){
+
+    //Runtime并没有在<objc/runtime.h>头文件中提供针对分类的操作函数。因为这些分类中的信息都包含在objc_class中，
+    //我们可以通过针对objc_class的操作函数来获取分类的信息。如下例所示：测试代码在 TestViewController.m 中
+
+    /**
+     其输出是：
+     2017-05-11 12:39:06.901 runtime[1522:829959] 测试objc_class中的方法列表是否包含分类中的方法
+     2017-05-11 12:39:06.901 runtime[1522:829959] RuntimeCategoryClass's method: method1
+     2017-05-11 12:39:06.902 runtime[1522:829959] 分类方法method2在objc_class的方法列表中
+     2017-05-11 12:39:06.902 runtime[1522:829959] RuntimeCategoryClass's method: method2
+     */
+    
+    //而对于Protocol，runtime提供了一系列函数来对其进行操作，这些函数包括：
+    
+    // 返回指定的协议
+    //objc_getProtocol函数，需要注意的是如果仅仅是声明了一个协议，而未在任何类中实现这个协议，则该函数返回的是nil。
+    Protocol * objc_getProtocol ( const char *name );
+    
+    // 获取运行时所知道的所有协议的数组
+    //objc_copyProtocolList函数，获取到的数组需要使用free来释放
+//    Protocol ** objc_copyProtocolList ( unsigned int *outCount );
+    
+    // 创建新的协议实例
+    //objc_allocateProtocol函数，如果同名的协议已经存在，则返回nil
+    Protocol * objc_allocateProtocol ( const char *name );
+    
+    // 在运行时中注册新创建的协议
+    //objc_registerProtocol函数，创建一个新的协议后，必须调用该函数以在运行时中注册新的协议。协议注册后便可以使用，但不能再做修改，即注册完后不能再向协议添加方法或协议
+    void objc_registerProtocol ( Protocol *proto );
+    
+    // 为协议添加方法
+    void protocol_addMethodDescription ( Protocol *proto, SEL name, const char *types, BOOL isRequiredMethod, BOOL isInstanceMethod );
+    
+    // 添加一个已注册的协议到协议中
+    void protocol_addProtocol ( Protocol *proto, Protocol *addition );
+    
+    // 为协议添加属性
+    void protocol_addProperty ( Protocol *proto, const char *name, const objc_property_attribute_t *attributes, unsigned int attributeCount, BOOL isRequiredProperty, BOOL isInstanceProperty );
+    
+    // 返回协议名
+    const char * protocol_getName ( Protocol *p );
+    
+    // 测试两个协议是否相等
+    BOOL protocol_isEqual ( Protocol *proto, Protocol *other );
+    
+    // 获取协议中指定条件的方法的方法描述数组
+    struct objc_method_description * protocol_copyMethodDescriptionList ( Protocol *p, BOOL isRequiredMethod, BOOL isInstanceMethod, unsigned int *outCount );
+    
+    // 获取协议中指定方法的方法描述
+    struct objc_method_description protocol_getMethodDescription ( Protocol *p, SEL aSel, BOOL isRequiredMethod, BOOL isInstanceMethod );
+    
+    // 获取协议中的属性列表
+    objc_property_t * protocol_copyPropertyList ( Protocol *proto, unsigned int *outCount );
+    
+    // 获取协议的指定属性
+    objc_property_t protocol_getProperty ( Protocol *proto, const char *name, BOOL isRequiredProperty, BOOL isInstanceProperty );
+    
+    // 获取协议采用的协议
+//    Protocol ** protocol_copyProtocolList ( Protocol *proto, unsigned int *outCount );
+    
+    // 查看协议是否采用了另一个协议
+    BOOL protocol_conformsToProtocol ( Protocol *proto, Protocol *other );
+
+#pragma mark - 需要强调的是，协议一旦注册后就不可再修改，即无法再通过调用protocol_addMethodDescription、protocol_addProtocol和protocol_addProperty往协议中添加方法等
+    
+    //小结  Runtime并没有提供过多的函数来处理分类。对于协议，我们可以动态地创建协议，并向其添加方法、属性及继承的协议，并在运行时动态地获取这些信息
+}
+//库相关操作
+void test28(){
+
+    //库相关的操作主要是用于获取由系统提供的库相关的信息，主要包含以下函数：
+    
+    // 获取所有加载的Objective-C框架和动态库的名称
+    const char ** objc_copyImageNames ( unsigned int *outCount );
+    
+    // 获取指定类所在动态库
+    const char * class_getImageName ( Class cls );
+    
+    // 获取指定库或框架中所有类的类名
+    const char ** objc_copyClassNamesForImage ( const char *image, unsigned int *outCount );
+
+    //通过这几个函数，我们可以了解到某个类所有的库，以及某个库中包含哪些类。如下代码所示：代码在 TestClass.m 里面
+
+    
+}
+//块操作
+void test29(){
+    
+   // 我们都知道block给我们带到极大的方便，苹果也不断提供一些使用block的新的API。\
+    同时，苹果在runtime中也提供了一些函数来支持针对block的操作，这些函数包括：
+
+    // 创建一个指针函数的指针，该函数调用时会调用特定的block
+    IMP imp_implementationWithBlock ( id block );
+    
+    // 返回与IMP(使用imp_implementationWithBlock创建的)相关的block
+    id imp_getBlock ( IMP anImp );
+    
+    // 解除block与IMP(使用imp_implementationWithBlock创建的)的关联关系，并释放block的拷贝
+    BOOL imp_removeBlock ( IMP anImp );
+    
+    //imp_implementationWithBlock函数：参数block的签名必须是method_return_type ^(id self, method_args …)形式的。\
+    该方法能让我们使用block作为IMP。如下代码所示：
+    
+    // 测试代码
+    IMP imp = imp_implementationWithBlock(^(id obj, NSString *str) {
+        NSLog(@"%@", str);
+    });
+    class_addMethod(MyRuntimeBlock.class, @selector(testBlock:), imp, "v@:@");
+    
+    MyRuntimeBlock *runtime = [[MyRuntimeBlock alloc] init];
+    [runtime performSelector:@selector(testBlock:) withObject:@"hello world!"];
+
+    /**
+     输出结果是:2017-05-11 12:57:26.793 runtime[1652:970046] hello world!
+     */
+}
+//弱引用操作
+void test30(){
+    
+    // 加载弱引用指针引用的对象并返回
+    //objc_loadWeak函数：该函数加载一个弱指针引用的对象，并在对其做retain和autoreleasing操作后返回它。这样，对象就可以在调用者使用它时保持足够长的生命周期。该函数典型的用法是在任何有使用__weak变量的表达式中使用。
+    id objc_loadWeak ( id *location );
+    
+    // 存储__weak变量的新值
+    //objc_storeWeak函数：该函数的典型用法是用于__weak变量做为赋值对象时
+    id objc_storeWeak ( id *location, id obj );
+
+    //这两个函数的具体实施可以参考《Objective-C高级编程：iOS与OS X多线程和内存管理》中对__weak实现的介绍。
+}
+//宏定义
+void test31(){
+    
+    //在runtime中，还定义了一些宏定义供我们使用，有些值我们会经常用到，如表示BOOL值的YES/NO；而有些值不常用，如OBJC_ROOT_CLASS。在此我们做一个简单的介绍。
+
+    //布尔值
+    #define YES  (BOOL)1
+    #define NO   (BOOL)0
+    //这两个宏定义定义了表示布尔值的常量，需要注意的是YES的值是1，而不是非0值。
+    
+    //空值
+    #define nil  __DARWIN_NULL
+    #define Nil  __DARWIN_NULL
+    //其中nil用于空的实例对象，而Nil用于空类对象。
+    
+    //分发函数原型
+    #define OBJC_OLD_DISPATCH_PROTOTYPES  1
+    //该宏指明分发函数是否必须转换为合适的函数指针类型。当值为0时，必须进行转换
+    
+    //Objective-C根类
+    #define OBJC_ROOT_CLASS
+    //如果我们定义了一个Objective-C根类，则编译器会报错，指明我们定义的类没有指定一个基类。这种情况下，我们就可以使用这个宏定义来避过这个编译错误。该宏在iOS 7.0后可用。
+    
+    
+    //其实在NSObject的声明中，我们就可以看到这个宏的身影，如下所示：
+    /**
+    __OSX_AVAILABLE_STARTING(__MAC_10_0, __IPHONE_2_0)
+    OBJC_ROOT_CLASS
+    OBJC_EXPORT
+    @interface NSObject <NSObject> {
+        Class isa  OBJC_ISA_AVAILABILITY;
+    }
+     */
+    //我们可以参考这种方式来定义我们自己的根类。
+    
+    
+    
+    //局部变量存储时长
+    #define NS_VALID_UNTIL_END_OF_SCOPE
+    //该宏表明存储在某些局部变量中的值在优化时不应该被编译器强制释放。\
+    我们将局部变量标记为id类型或者是指向ObjC对象类型的指针，以便存储在这些局部变量中的值在优化时不会被编译器强制释放。相反，这些值会在变量再次被赋值之前或者局部变量的作用域结束之前都会被保存。
+    
+    //关联对象行为
+    enum {
+        OBJC_ASSOCIATION_ASSIGN  = 0,
+        OBJC_ASSOCIATION_RETAIN_NONATOMIC  = 1,
+        OBJC_ASSOCIATION_COPY_NONATOMIC  = 3,
+        OBJC_ASSOCIATION_RETAIN  = 01401,
+        OBJC_ASSOCIATION_COPY  = 01403
+    };
+    //参照 test8
+    
+}
 
 
 
